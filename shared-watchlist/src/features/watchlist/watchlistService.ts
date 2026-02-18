@@ -1,19 +1,35 @@
 import { supabase } from '../../services/supabase'
+import { getOrCreateMedia } from '../../services/mediaService'
+
+export interface Media {
+  id: string
+  tmdb_id: number
+  media_type: 'movie' | 'tv'
+  title: string
+  release_year: string | null
+  description: string | null
+  poster_path: string | null
+  created_at: string
+  updated_at: string
+}
 
 export interface WatchlistItem {
   id: string
   group_id: string
-  title: string
-  type: string
+  media_id: string
   added_by: string
   created_at: string
   status: 'watched' | 'not_watched'
+  media?: Media
 }
 
 export async function getWatchlistItems(groupId: string) {
   const { data, error } = await supabase
     .from('watchlist_items')
-    .select('*')
+    .select(`
+      *,
+      media:media(*)
+    `)
     .eq('group_id', groupId)
     .order('created_at', { ascending: false })
 
@@ -28,19 +44,36 @@ export async function getWatchlistItems(groupId: string) {
 export async function addWatchlistItem(
   groupId: string,
   title: string,
-  type: string,
-  addedBy: string
+  mediaType: 'movie' | 'tv',
+  addedBy: string,
+  tmdbId: number,
+  posterPath: string | null,
+  releaseYear: string | null,
+  description: string | null
 ) {
+  // First, get or create the media in the media table
+  const media = await getOrCreateMedia(
+    tmdbId,
+    mediaType,
+    title,
+    releaseYear,
+    description,
+    posterPath
+  )
+
+  // Then, add the watchlist item with the media_id
   const { data, error } = await supabase
     .from('watchlist_items')
     .insert({
       group_id: groupId,
-      title,
-      type,
+      media_id: media.id,
       added_by: addedBy,
       status: 'not_watched',
     })
-    .select()
+    .select(`
+      *,
+      media:media(*)
+    `)
     .single()
 
   if (error) {

@@ -46,6 +46,17 @@ export default function WatchlistPage({ groupId, groupName, onBack }: WatchlistP
     }
   }
 
+  // Refresh items without showing loading spinner (for mutations)
+  const refreshItems = async () => {
+    try {
+      setError(null)
+      const data = await getWatchlistItems(groupId)
+      setItems(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    }
+  }
+
   const fetchMembers = async () => {
     try {
       const data = await getGroupMembers(groupId)
@@ -87,7 +98,7 @@ export default function WatchlistPage({ groupId, groupName, onBack }: WatchlistP
         getYear(getReleaseDate(media)),
         media.overview || null
       )
-      await fetchItems()
+      await refreshItems()
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     }
@@ -98,7 +109,7 @@ export default function WatchlistPage({ groupId, groupName, onBack }: WatchlistP
       setError(null)
       const newStatus = item.status === 'watched' ? 'not_watched' : 'watched'
       await updateWatchlistStatus(item.id, newStatus)
-      await fetchItems()
+      await refreshItems()
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     }
@@ -110,7 +121,7 @@ export default function WatchlistPage({ groupId, groupName, onBack }: WatchlistP
     try {
       setError(null)
       await deleteWatchlistItem(itemId)
-      await fetchItems()
+      await refreshItems()
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     }

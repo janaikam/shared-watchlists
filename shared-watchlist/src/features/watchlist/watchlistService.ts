@@ -20,6 +20,7 @@ export interface WatchlistItem {
   added_by: string
   created_at: string
   status: 'watched' | 'not_watched'
+  request: number
   media?: Media
 }
 
@@ -31,6 +32,7 @@ export async function getWatchlistItems(groupId: string) {
       media:media(*)
     `)
     .eq('group_id', groupId)
+    .order('request', { ascending: false })
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -61,7 +63,41 @@ export async function addWatchlistItem(
     posterPath
   )
 
-  // Then, add the watchlist item with the media_id
+  // Check if this media already exists in the group's watchlist
+  const { data: existingItem, error: checkError } = await supabase
+    .from('watchlist_items')
+    .select('*')
+    .eq('group_id', groupId)
+    .eq('media_id', media.id)
+    .limit(1)
+    .maybeSingle()
+
+  if (checkError) {
+    console.error('Error checking existing watchlist item:', checkError)
+    throw checkError
+  }
+
+  // If item already exists, increment the request count
+  if (existingItem) {
+    const { data: updated, error: updateError } = await supabase
+      .from('watchlist_items')
+      .update({ request: (existingItem.request || 0) + 1 })
+      .eq('id', existingItem.id)
+      .select(`
+        *,
+        media:media(*)
+      `)
+      .single()
+
+    if (updateError) {
+      console.error('Error incrementing request count:', updateError)
+      throw updateError
+    }
+
+    return updated as WatchlistItem
+  }
+
+  // Item doesn't exist, add it with request = 0
   const { data, error } = await supabase
     .from('watchlist_items')
     .insert({
@@ -69,6 +105,7 @@ export async function addWatchlistItem(
       media_id: media.id,
       added_by: addedBy,
       status: 'not_watched',
+      request: 0,
     })
     .select(`
       *,

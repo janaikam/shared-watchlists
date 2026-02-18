@@ -3,11 +3,10 @@ import type { User } from 'firebase/auth'
 import {
 	createUserWithEmailAndPassword,
 	signInWithEmailAndPassword,
-	signInWithPopup,
 	signOut as firebaseSignOut,
 	onAuthStateChanged,
 } from 'firebase/auth'
-import { auth, googleProvider } from '../../services/firebase'
+import { auth } from '../../services/firebase'
 import { AuthContext } from './AuthContext.tsx'
 import { ensureUserExists, getEmailByUsername } from '../../services/supabase'
 
@@ -49,16 +48,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		await signInWithEmailAndPassword(auth, email, password)
 	}
 
-	const signInWithGoogle = async () => {
-		await signInWithPopup(auth, googleProvider)
-	}
-
 	const signOut = async () => {
 		await firebaseSignOut(auth)
 	}
 
 	return (
-		<AuthContext.Provider value={{ user, loading, signUp, signIn, signInWithGoogle, signOut }}>
+		<AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
 			{children}
 		</AuthContext.Provider>
 	)

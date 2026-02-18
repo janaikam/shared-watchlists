@@ -16,9 +16,10 @@ export async function ensureUserExists(firebaseUid: string, email?: string | nul
   console.log('ensureUserExists - Email:', email)
   console.log('ensureUserExists - Username:', username)
 
+  // First check if user already exists
   const { data: existing, error: selectError } = await supabase
     .from('users')
-    .select('id, firebase_uid')
+    .select('*')
     .eq('firebase_uid', firebaseUid)
     .limit(1)
     .maybeSingle()
@@ -31,11 +32,29 @@ export async function ensureUserExists(firebaseUid: string, email?: string | nul
     throw selectError
   }
 
+  // If user exists and we have a username but they don't, update them
   if (existing) {
+    if (username && !existing.username) {
+      console.log('ensureUserExists - Updating existing user with username')
+      const { data: updated, error: updateError } = await supabase
+        .from('users')
+        .update({ username })
+        .eq('firebase_uid', firebaseUid)
+        .select()
+        .single()
+
+      if (updateError) {
+        console.error('Error updating user with username:', updateError)
+        throw updateError
+      }
+      return updated
+    }
+    // User exists and either has username or we don't have one to add
     console.log('ensureUserExists - Returning existing user')
     return existing
   }
 
+  // User doesn't exist, create new record
   console.log('ensureUserExists - Creating new user')
 
   const insertPayload: any = {
@@ -45,22 +64,21 @@ export async function ensureUserExists(firebaseUid: string, email?: string | nul
   if (email) insertPayload.email = email
   if (username) insertPayload.username = username
 
-  // Use upsert to avoid race conditions: if a row with same firebase_uid exists, do nothing
-  const { data: upserted, error: upsertError } = await supabase
+  const { data: inserted, error: insertError } = await supabase
     .from('users')
-    .upsert(insertPayload, { onConflict: 'firebase_uid' })
+    .insert(insertPayload)
     .select()
     .single()
 
-  console.log('ensureUserExists - Upserted user:', upserted)
-  console.log('ensureUserExists - Upsert error:', upsertError)
+  console.log('ensureUserExists - Inserted user:', inserted)
+  console.log('ensureUserExists - Insert error:', insertError)
 
-  if (upsertError) {
-    console.error('Error upserting user into Supabase:', upsertError)
-    throw upsertError
+  if (insertError) {
+    console.error('Error inserting user into Supabase:', insertError)
+    throw insertError
   }
 
-  return upserted
+  return inserted
 }
 
 export async function getEmailByUsername(username: string): Promise<string | null> {

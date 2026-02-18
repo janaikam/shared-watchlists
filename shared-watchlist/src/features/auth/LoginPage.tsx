@@ -2,7 +2,7 @@ import { useState } from 'react'
 import useAuth from './useAuth'
 
 export default function LoginPage() {
-	const { signIn, signUp, signInWithGoogle } = useAuth()
+	const { signIn, signUp } = useAuth()
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [username, setUsername] = useState('')
@@ -24,15 +24,6 @@ export default function LoginPage() {
 			}
 		} catch (err: unknown) {
 			setError(err instanceof Error ? err.message : 'Authentication error')
-		}
-	}
-
-	const handleGoogle = async () => {
-		setError(null)
-		try {
-			await signInWithGoogle()
-		} catch (err: unknown) {
-			setError(err instanceof Error ? err.message : 'Google sign in failed')
 		}
 	}
 
@@ -67,10 +58,9 @@ export default function LoginPage() {
 			</form>
 
 			<div style={{ marginTop: 12 }}>
-				<button onClick={() => setIsSigningUp((s) => !s)} style={{ marginRight: 8 }}>
+				<button onClick={() => setIsSigningUp((s) => !s)}>
 					{isSigningUp ? 'Have an account? Sign in' : "Don't have an account? Sign up"}
 				</button>
-				<button onClick={handleGoogle}>Sign in with Google</button>
 			</div>
 
 			{error && <p style={{ color: 'crimson', marginTop: 12 }}>{error}</p>}

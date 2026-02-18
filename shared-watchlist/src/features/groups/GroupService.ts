@@ -106,27 +106,38 @@ interface GroupMemberRow {
     id: string
     firebase_uid: string
     email: string
+    username: string
     created_at: string
-  }[]
+  } | null
 }
 
 export async function getGroupMembers(groupId: string) {
   const { data, error } = await supabase
     .from('group_members')
-    .select('user_id, role, joined_at, users(id, firebase_uid, email, created_at)')
+    .select('user_id, role, joined_at, users!inner(id, firebase_uid, email, username, created_at)')
     .eq('group_id', groupId)
+
+  console.log('getGroupMembers - Raw data:', data)
+  console.log('getGroupMembers - Error:', error)
 
   if (error) {
     console.error('Error fetching group members:', error)
     throw error
   }
 
-  return (data ?? []).map((row: GroupMemberRow) => ({
-    user_id: row.user_id,
-    role: row.role,
-    joined_at: row.joined_at,
-    user: row.users[0],
-  }))
+  const mapped = (data ?? []).map((row: any) => {
+    console.log('getGroupMembers - Processing row:', row)
+    console.log('getGroupMembers - row.users:', row.users)
+    return {
+      user_id: row.user_id,
+      role: row.role,
+      joined_at: row.joined_at,
+      user: row.users,
+    }
+  })
+
+  console.log('getGroupMembers - Mapped result:', mapped)
+  return mapped
 }
 
 export async function removeGroupMember(groupId: string, userId: string) {

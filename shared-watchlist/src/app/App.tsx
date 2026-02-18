@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react'
-import reactLogo from '../assets/react.svg'
-import viteLogo from '/vite.svg'
 import '../styles/App.css'
 import LoginPage from '../features/auth/LoginPage'
 import useAuth from '../features/auth/useAuth'
@@ -12,13 +10,29 @@ function App() {
   const [username, setUsername] = useState<string | null>(null)
 
   useEffect(() => {
-    if (user) {
-      getUsernameByFirebaseUid(user.uid).then((name) => {
-        setUsername(name)
-      })
-    } else {
-      setUsername(null)
+    if (!user) {
+      return
     }
+
+    // Fetch username immediately when user is available
+    const fetchUsername = async () => {
+      const name = await getUsernameByFirebaseUid(user.uid)
+      setUsername(name)
+
+      // If username is null, retry after a short delay
+      // This handles race conditions during signup where the username
+      // may not be in the database yet
+      if (!name) {
+        setTimeout(async () => {
+          const retryName = await getUsernameByFirebaseUid(user.uid)
+          if (retryName) {
+            setUsername(retryName)
+          }
+        }, 500)
+      }
+    }
+
+    fetchUsername()
   }, [user])
 
   if (loading) return <div style={{ padding: 20 }}>Loading...</div>
@@ -26,21 +40,26 @@ function App() {
   if (!user) return <LoginPage />
 
   return (
-    <div style={{ padding: 20 }}>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div>
+      {/* Top Navigation Bar */}
+      <nav className="navbar navbar-light bg-light border-bottom">
+        <div className="container-fluid px-4">
+          <span className="navbar-brand mb-0 h1">Movie Watchlists</span>
+          <button className="btn btn-outline-danger" onClick={() => signOut()}>
+            Log out
+          </button>
+        </div>
+      </nav>
+
+      {/* Welcome Message */}
+      <div className="bg-light">
+        <div className="container-fluid px-4 text-center py-4">
+          <h1>Welcome, {username || user.email}!</h1>
+        </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
-        <h1 style={{ margin: 0 }}>Welcome {username || user.email}</h1>
-        <button onClick={() => signOut()}>Log out</button>
-      </div>
-      <p className="read-the-docs">You're signed in.</p>
-      <main style={{ marginTop: 20 }}>
+
+      {/* Main Content */}
+      <main>
         <GroupListPage />
       </main>
     </div>

@@ -9,7 +9,7 @@ import {
 } from 'firebase/auth'
 import { auth, googleProvider } from '../../services/firebase'
 import { AuthContext } from './AuthContext.tsx'
-import { ensureUserExists } from '../../services/supabase'
+import { ensureUserExists, getEmailByUsername } from '../../services/supabase'
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const [user, setUser] = useState<User | null>(null)
@@ -29,11 +29,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		return () => unsubscribe()
 	}, [])
 
-	const signUp = async (email: string, password: string) => {
-		await createUserWithEmailAndPassword(auth, email, password)
+	const signUp = async (email: string, password: string, username: string) => {
+		const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+		// Immediately create the Supabase user record with username
+		await ensureUserExists(userCredential.user.uid, email, username)
 	}
 
-	const signIn = async (email: string, password: string) => {
+	const signIn = async (emailOrUsername: string, password: string) => {
+		// Check if input looks like an email (contains @)
+		let email = emailOrUsername
+		if (!emailOrUsername.includes('@')) {
+			// It's a username, look up the email
+			const foundEmail = await getEmailByUsername(emailOrUsername)
+			if (!foundEmail) {
+				throw new Error('Username not found')
+			}
+			email = foundEmail
+		}
 		await signInWithEmailAndPassword(auth, email, password)
 	}
 

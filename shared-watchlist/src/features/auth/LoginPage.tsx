@@ -5,6 +5,7 @@ export default function LoginPage() {
 	const { signIn, signUp, signInWithGoogle } = useAuth()
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	const [username, setUsername] = useState('')
 	const [error, setError] = useState<string | null>(null)
 	const [isSigningUp, setIsSigningUp] = useState(false)
 
@@ -12,10 +13,17 @@ export default function LoginPage() {
 		e.preventDefault()
 		setError(null)
 		try {
-			if (isSigningUp) await signUp(email, password)
-			else await signIn(email, password)
-		} catch (err: any) {
-			setError(err?.message || 'Authentication error')
+			if (isSigningUp) {
+				if (!username.trim()) {
+					setError('Username is required')
+					return
+				}
+				await signUp(email, password, username.trim())
+			} else {
+				await signIn(email, password)
+			}
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : 'Authentication error')
 		}
 	}
 
@@ -23,8 +31,8 @@ export default function LoginPage() {
 		setError(null)
 		try {
 			await signInWithGoogle()
-		} catch (err: any) {
-			setError(err?.message || 'Google sign in failed')
+		} catch (err: unknown) {
+			setError(err instanceof Error ? err.message : 'Google sign in failed')
 		}
 	}
 
@@ -32,11 +40,20 @@ export default function LoginPage() {
 		<div style={{ maxWidth: 420, margin: '40px auto', padding: 20 }}>
 			<h2>{isSigningUp ? 'Create account' : 'Sign in'}</h2>
 			<form onSubmit={handleSubmit} style={{ display: 'grid', gap: 8 }}>
+				{isSigningUp && (
+					<input
+						placeholder="Username"
+						value={username}
+						onChange={(e) => setUsername(e.target.value)}
+						type="text"
+						required
+					/>
+				)}
 				<input
-					placeholder="Email"
+					placeholder={isSigningUp ? "Email" : "Email or Username"}
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
-					type="email"
+					type={isSigningUp ? "email" : "text"}
 					required
 				/>
 				<input

@@ -43,7 +43,7 @@ function App() {
     <div>
       {/* Top Navigation Bar */}
       <nav className="navbar navbar-light bg-light border-bottom">
-        <div className="container-fluid px-4">
+        <div className="container-fluid">
           <span className="navbar-brand mb-0 h1">Movie Watchlists</span>
           <button className="btn btn-outline-danger" onClick={() => signOut()}>
             Log out
@@ -53,7 +53,7 @@ function App() {
 
       {/* Welcome Message */}
       <div className="bg-light">
-        <div className="container-fluid px-4 text-center py-4">
+        <div className="container-fluid text-center py-4">
           <h1>Welcome, {username || user.email}!</h1>
         </div>
       </div>

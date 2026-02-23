@@ -60,14 +60,14 @@ export default function GroupListPage() {
       onBack={() => setSelectedGroup(null)}
     />
   ) : (
-    <div className="container-fluid py-4">
+    <div className="container-fluid px-0 py-4">
       {/* Header */}
-      <div className="mb-4">
+      <div className="mb-4 px-3">
         <h2>Your Groups</h2>
       </div>
 
       {/* Create and Join Forms */}
-      <div className="row mb-4 g-3">
+      <div className="row mb-4 g-3 px-3">
         <div className="col-md-6">
           <div className="card">
             <div className="card-body">
@@ -166,6 +166,7 @@ export default function GroupListPage() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    //</div>
   )
 }

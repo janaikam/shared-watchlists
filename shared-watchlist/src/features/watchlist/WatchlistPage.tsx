@@ -128,9 +128,10 @@ export default function WatchlistPage({ groupId, groupName, onBack }: WatchlistP
   }
 
   return (
-    <div className="container-fluid py-4">
-      {/* Header Section */}
-      <div className="mb-4">
+    <div className="container-fluid px-0 py-4">
+      <div className="px-3">
+        {/* Header Section */}
+        <div className="mb-4">
         <button className="btn btn-outline-secondary mb-3" onClick={onBack}>
           ← Back to Groups
         </button>
@@ -305,6 +306,7 @@ export default function WatchlistPage({ groupId, groupName, onBack }: WatchlistP
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

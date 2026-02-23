@@ -1,73 +1,134 @@
-# React + TypeScript + Vite
+# 🎬 Shared Watchlist App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A collaborative movie and TV show watchlist application that allows friends to create groups, add titles, and keep track of what everyone wants to watch — all in one place.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Overview
 
-## React Compiler
+The Shared Watchlist App is designed to make deciding what to watch with friends easier. Users can create accounts, join groups, and contribute movies or shows to a shared group watchlist.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Each group maintains its own list, so recommendations stay organized and relevant to that specific friend group.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ✨ Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 🔐 Authentication
+- User registration and login
+- Secure authentication
+- Persistent user sessions
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 👥 Groups
+- Create new groups
+- Join existing groups
+- View a list of groups you are a member of
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🎥 Watchlists
+- Add movies or TV shows to a group’s watchlist
+- View all watchlist items within a group
+- See what your friends want to watch
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- React (Vite)
+- Bootstrap (for styling)
+
+### Backend
+- Supabase (PostgreSQL database)
+- Firebase Authentication
+
+### Database
+Relational schema including:
+- Users
+- Groups
+- Group Members
+- Movies / TV Shows
+- Watchlist Items
+
+---
+
+## 🗄️ Database Structure (High Level)
+
+### Users
+- `id`
+- `username`
+- `email`
+
+### Groups
+- `id`
+- `name`
+- `created_by`
+- `created_at`
+
+### Group Members
+- `id`
+- `group_id`
+- `user_id`
+
+### Movies
+- `id`
+- `title`
+- `type` (movie or tv)
+- `tmdb_id`
+- `poster_path`
+
+### Watchlist Items
+- `id`
+- `group_id`
+- `movie_id`
+- `added_by`
+- `created_at`
+
+---
+
+## 📦 Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/shared-watchlist.git
+cd shared-watchlist
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+### 3. Create a `.env` file
+
+Add the following environment variables:
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+```
+
+### 4. Start the development server
+
+```bash
+npm run dev
+```
+
+---
+
+## 🔮 Future Improvements
+
+- Voting system within groups
+- Watch history tracking
+- Dark / Light mode toggle
+- Group admin permissions
+- Mobile/Desktop UI optimization
+
+---
+
+## 🎯 Project Goal
+
+The goal of this project is to simplify group decision-making for movies and TV shows while practicing full-stack development with authentication, relational databases, and group-based permissions.
+

@@ -130,5 +130,5 @@ npm run dev
 
 ## 🎯 Project Goal
 
-The goal of this project is to simplify group decision-making for movies and TV shows while practicing full-stack development with authentication, relational databases, and group-based permissions.
+The goal of this project is to simplify group decision-making for movies and TV shows while practicing full-stack development with authentication, relational databases, and group-based permissions. 
 
